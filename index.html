@@ -1,1 +1,175 @@
 
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Human Verification</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f1f3f4;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  width: 340px;
+  padding: 28px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 25px #0002;
+}
+
+h2 {
+  font-size: 22px;
+  margin-top: 0;
+}
+
+.description {
+  color: #666;
+  font-size: 14px;
+}
+
+.captcha {
+  margin-top: 25px;
+  padding: 17px;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.captcha input {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+#status {
+  font-size: 13px;
+  color: #555;
+}
+
+#scareScreen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  z-index: 9999;
+}
+
+#scareScreen iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+#fullBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10001;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: white;
+  color: black;
+  cursor: pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container" id="main">
+
+  <h2>Human Verification</h2>
+
+  <p class="description">
+    Please verify that you are human.
+  </p>
+
+  <div class="captcha">
+
+    <input type="checkbox" id="verify">
+
+    <label for="verify">
+      I'm not a robot
+    </label>
+
+  </div>
+
+  <p id="status"></p>
+
+</div>
+
+
+<div id="scareScreen">
+
+  <iframe
+    id="video"
+    title="YouTube test video"
+    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+    allowfullscreen>
+  </iframe>
+
+  <button id="fullBtn" onclick="goFullscreen()">
+    전체 화면
+  </button>
+
+</div>
+
+
+<script>
+
+const verify = document.getElementById("verify");
+const main = document.getElementById("main");
+const screen = document.getElementById("scareScreen");
+const video = document.getElementById("video");
+const statusText = document.getElementById("status");
+
+verify.addEventListener("change", async function() {
+
+  if (!this.checked) return;
+
+  statusText.textContent = "Verifying...";
+
+  // 인증 화면 표시 후 영상 재생
+  setTimeout(() => {
+
+    main.style.display = "none";
+    screen.style.display = "block";
+
+    video.src =
+      "https://www.youtube.com/embed/seQbJorCLBg?autoplay=1";
+
+  }, 1500);
+
+});
+
+function goFullscreen() {
+
+  if (screen.requestFullscreen) {
+    screen.requestFullscreen();
+  }
+
+}
+
+</script>
+
+</body>
+</html>
+
