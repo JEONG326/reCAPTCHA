@@ -72,28 +72,28 @@
       width: 100%;
       height: 100%;
       background: #000;
+      z-index: 9999;
     }
 
-    /* 영상 */
+    /* 영상 - 모바일에서 세로로 들고 있어도 강제로 가로 꽉 차게 보이도록 회전 및 크기 조절 */
     #video {
-      display: block;
-      width: 100%;
-      height: 100%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100vh;
+      height: 100vw;
       object-fit: cover;
-      object-position: center;
+      transform: translate(-50%, -50%) rotate(90deg);
+      transform-origin: center;
     }
 
-    /* 전체 화면 */
-    #scareScreen:fullscreen {
-      width: 100vw;
-      height: 100vh;
-      background: #000;
-    }
-
-    #scareScreen:fullscreen video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    /* 만약 기기가 이미 가로 방향이거나 PC인 경우 회전 해제 */
+    @media (orientation: landscape) {
+      #video {
+        width: 100%;
+        height: 100%;
+        transform: translate(-50%, -50%) rotate(0deg);
+      }
     }
   </style>
 </head>
@@ -103,7 +103,6 @@
   <!-- 시작 화면 -->
   <div id="main">
     <button id="startButton" type="button">
-      <!-- 깃허브에 올라간 실제 파일 이름인 button.png로 수정했습니다[cite: 1] -->
       <img src="images/button.png" alt="시작">
     </button>
   </div>
@@ -138,22 +137,24 @@
       // 영상 소리 켜기
       video.muted = false;
 
-      // 전체 화면 전환
+      // 전체 화면 전환 시도
       try {
         if (screen.requestFullscreen) {
           await screen.requestFullscreen();
+        } else if (screen.webkitRequestFullscreen) { /* 아이폰 사파리 대응 */
+          await screen.webkitRequestFullscreen();
         }
       } catch (error) {
         console.log("전체 화면 전환 실패:", error);
       }
 
-      // 휴대폰 화면을 가로 방향으로 고정
+      // 기기 자체의 강제 화면 회전 시도 (지원하는 브라우저용)
       try {
         if (screen.orientation && screen.orientation.lock) {
           await screen.orientation.lock("landscape");
         }
       } catch (error) {
-        console.log("가로 화면 고정 미지원:", error);
+        console.log("가로 화면 고정 미지원 (CSS 회전으로 대체됨):", error);
       }
 
       // 영상 재생
