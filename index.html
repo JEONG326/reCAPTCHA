@@ -1,136 +1,166 @@
+
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Verification</title>
+  <title>무료로 선물을 드립니다</title>
 
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+  <!-- 링크 미리보기 -->
+  <meta property="og:title" content="무료로 선물을 드립니다">
+  <meta property="og:description" content="무료로 선물을 드립니다">
+  <meta name="description" content="무료로 선물을 드립니다">
 
-html, body {
-    width: 100%;
-    height: 100%;
-    background: #000;
-    overflow: hidden;
-}
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-/* 처음 이미지 화면 */
-#main {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #F5F6FA;
+    }
 
-#startImage {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    cursor: pointer;
-}
+    /* 배경 화면 */
+    #main {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
 
-/* 영상 화면 */
-#scareScreen {
-    display: none;
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    background: #000;
-}
+      display: flex;
+      justify-content: center;
+      align-items: center;
 
-#video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
+      background-color: #F5F6FA;
+      background-image: url("images/background.jpg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
 
-/* 전체 화면 */
-#scareScreen:fullscreen {
-    width: 100vw;
-    height: 100vh;
-    background: #000;
-}
+    /* 가운데 버튼 이미지 */
+    #startButton {
+      display: flex;
+      justify-content: center;
+      align-items: center;
 
-#scareScreen:fullscreen video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-</style>
+      width: min(80vw, 420px);
+      max-height: 80vh;
 
+      border: none;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    #startButton img {
+      display: block;
+      width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+    }
+
+    /* 영상 화면 */
+    #scareScreen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+
+    /* 영상 */
+    #video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    /* 전체 화면 */
+    #scareScreen:fullscreen {
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+    }
+
+    #scareScreen:fullscreen video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- 시작 이미지 -->
-<div id="main">
+  <!-- 시작 화면 -->
+  <div id="main">
 
-    <img
-        id="startImage"
-        src="images/start.jpg"
-        alt="Click to continue"
-    >
+    <button id="startButton" type="button">
+      <img src="images/start.jpg" alt="시작">
+    </button>
 
-</div>
+  </div>
 
-<!-- 영상 화면 -->
-<div id="scareScreen">
+  <!-- 영상 화면 -->
+  <div id="scareScreen">
 
     <video
-        id="video"
-        src="videos/scare.mp4"
-        loop
-        playsinline
-        preload="auto"
-        controls
+      id="video"
+      src="videos/scare.mp4"
+      loop
+      playsinline
+      preload="auto"
+      controls
     ></video>
 
-</div>
+  </div>
 
-<script>
+  <script>
+    const main = document.getElementById("main");
+    const button = document.getElementById("startButton");
+    const screen = document.getElementById("scareScreen");
+    const video = document.getElementById("video");
 
-const image = document.getElementById("startImage");
-const screen = document.getElementById("scareScreen");
-const video = document.getElementById("video");
-const main = document.getElementById("main");
+    let started = false;
 
-image.addEventListener("click", async function() {
+    button.addEventListener("click", async function() {
 
-    // 중복 클릭 방지
-    image.style.pointerEvents = "none";
+      if (started) return;
+      started = true;
 
-    // 이미지 화면 숨기기
-    main.style.display = "none";
+      main.style.display = "none";
+      screen.style.display = "block";
 
-    // 영상 화면 표시
-    screen.style.display = "block";
+      try {
+        const fullscreenPromise =
+          screen.requestFullscreen
+            ? screen.requestFullscreen()
+            : Promise.resolve();
 
-    // 전체 화면 전환 시도
-    try {
-        await screen.requestFullscreen();
-    } catch (error) {
-        console.log("전체 화면 전환이 지원되지 않습니다.");
-    }
+        video.muted = false;
 
-    // 영상 재생
-    try {
-        await video.play();
-    } catch (error) {
-        console.log("영상 재생에 실패했습니다.", error);
-    }
+        const playPromise = video.play();
 
-});
+        await Promise.all([
+          fullscreenPromise,
+          playPromise
+        ]);
 
-</script>
+      } catch (error) {
+        console.log("재생 또는 전체 화면 전환 오류:", error);
+      }
+
+    });
+  </script>
 
 </body>
 </html>
