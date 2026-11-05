@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <title>무료로 선물을 드립니다</title>
 
@@ -22,7 +22,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #F5F6FA;
+      background: #000;
     }
 
     /* 배경 화면 */
@@ -41,6 +41,7 @@
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
+      z-index: 1;
     }
 
     /* 가운데 버튼 이미지 */
@@ -64,34 +65,41 @@
       object-fit: contain;
     }
 
-    /* 영상 화면 */
+    /* 영상 화면 컨테이너 */
     #scareScreen {
       display: none;
       position: fixed;
       inset: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       background: #000;
       z-index: 9999;
+      overflow: hidden;
     }
 
-    /* 영상 - 모바일에서 세로로 들고 있어도 강제로 가로 꽉 차게 보이도록 회전 및 크기 조절 */
+    /* 영상 스타일 */
     #video {
+      display: block;
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 100vh;
-      height: 100vw;
       object-fit: cover;
-      transform: translate(-50%, -50%) rotate(90deg);
-      transform-origin: center;
     }
 
-    /* 만약 기기가 이미 가로 방향이거나 PC인 경우 회전 해제 */
+    /* 1. 세로 모드일 때: 화면 전체를 90도 강제 회전시켜 게임 가로모드처럼 만듦 */
+    @media (orientation: portrait) {
+      #video {
+        width: 100vh;
+        height: 100vw;
+        transform: translate(-50%, -50%) rotate(90deg);
+      }
+    }
+
+    /* 2. 이미 가로 모드일 때: 회전 없이 꽉 채움 */
     @media (orientation: landscape) {
       #video {
-        width: 100%;
-        height: 100%;
+        width: 100vw;
+        height: 100vh;
         transform: translate(-50%, -50%) rotate(0deg);
       }
     }
@@ -114,8 +122,8 @@
       src="videos/scare.mp4"
       loop
       playsinline
+      webkit-playsinline
       preload="auto"
-      controls
     ></video>
   </div>
 
@@ -131,37 +139,38 @@
       if (started) return;
       started = true;
 
+      // 1. 메인 화면 숨기고 영상 화면 켜기
       main.style.display = "none";
       screen.style.display = "block";
 
-      // 영상 소리 켜기
+      // 2. 소리 켜기
       video.muted = false;
 
-      // 전체 화면 전환 시도
+      // 3. 브라우저 전체 화면 전환 시도
       try {
         if (screen.requestFullscreen) {
           await screen.requestFullscreen();
-        } else if (screen.webkitRequestFullscreen) { /* 아이폰 사파리 대응 */
+        } else if (screen.webkitRequestFullscreen) {
           await screen.webkitRequestFullscreen();
         }
-      } catch (error) {
-        console.log("전체 화면 전환 실패:", error);
+      } catch (e) {
+        console.log("전체화면 모드 거부됨 (CSS 회전으로 대체)");
       }
 
-      // 기기 자체의 강제 화면 회전 시도 (지원하는 브라우저용)
+      // 4. 모바일 기기 화면 방향 고정 시도 (지원하는 단말기용)
       try {
         if (screen.orientation && screen.orientation.lock) {
           await screen.orientation.lock("landscape");
         }
-      } catch (error) {
-        console.log("가로 화면 고정 미지원 (CSS 회전으로 대체됨):", error);
+      } catch (e) {
+        console.log("화면 회전 잠금 미지원 단말기");
       }
 
-      // 영상 재생
+      // 5. 영상 재생
       try {
         await video.play();
       } catch (error) {
-        console.log("영상 재생 실패:", error);
+        console.log("영상 자동재생 실패:", error);
       }
     });
   </script>
